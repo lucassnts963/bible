@@ -1,46 +1,37 @@
-import { StatusBar } from 'react-native'
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs'
-import { useTheme, useColorMode } from 'native-base'
+import {
+  createStackNavigator,
+  StackNavigationProp,
+} from '@react-navigation/stack'
+import { RouteProp } from '@react-navigation/native'
 
 import { BooksContextProvider } from '@/contexts'
-import { NewTestament, OldTestament } from '@/screens'
-import { TabBar } from '@/components'
+import { HomeScreen, BookScreen } from '@/screens'
+import { Chapter } from '@/entities'
 
-const Tab = createMaterialTopTabNavigator()
+export type RootStackParamList = {
+  Home: undefined
+  Book: { chapters: Chapter[] }
+}
+
+export type BookScreenNavigationProps = StackNavigationProp<
+  RootStackParamList,
+  'Book'
+>
+
+export type BookScreenRouteProps = RouteProp<RootStackParamList, 'Book'>
+
+const Stack = createStackNavigator<RootStackParamList>()
 
 export function PrivateNavigator() {
-  const { colors } = useTheme()
-  const { colorMode } = useColorMode()
-
   return (
     <BooksContextProvider>
-      <Tab.Navigator
-        style={{ paddingTop: StatusBar.currentHeight }}
-        screenOptions={{
-          tabBarStyle: {
-            backgroundColor:
-              colorMode === 'dark' ? colors.gray[900] : colors.gray[100],
-          },
-          tabBarActiveTintColor:
-            colorMode === 'dark' ? colors.amber[700] : colors.amber[500],
-          tabBarIndicatorStyle: {
-            backgroundColor:
-              colorMode === 'dark' ? colors.amber[700] : colors.amber[500],
-          },
-        }}
-        tabBar={(props) => <TabBar {...props} />}
+      <Stack.Navigator
+        screenOptions={{ headerShown: false }}
+        initialRouteName="Home"
       >
-        <Tab.Screen
-          name="OldTestament"
-          component={OldTestament}
-          options={{ title: 'Velho Testamento' }}
-        />
-        <Tab.Screen
-          name="NewTestament"
-          component={NewTestament}
-          options={{ title: 'Novo Testamento' }}
-        />
-      </Tab.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Book" component={BookScreen} />
+      </Stack.Navigator>
     </BooksContextProvider>
   )
 }

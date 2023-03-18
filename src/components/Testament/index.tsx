@@ -15,6 +15,7 @@ export function Testament({ data }: Props) {
       px={2}
       data={data}
       renderItem={({ item }) => <ItemBook data={item} />}
+      keyExtractor={(item) => item.title}
     />
   )
 }

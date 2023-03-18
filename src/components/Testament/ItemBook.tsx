@@ -9,6 +9,9 @@ import {
 
 import { Book, Chapter } from '@/entities'
 import { useCallback, useEffect, useState } from 'react'
+import { useNavigation } from '@react-navigation/native'
+
+import { BookScreenNavigationProps } from '@/routes'
 
 interface Props {
   data: Book
@@ -19,6 +22,8 @@ export function ItemBook({ data }: Props) {
   const [chapters, setChapters] = useState<Chapter[]>()
   const { colorMode } = useColorMode()
   const { title, verses } = data
+
+  const navigation = useNavigation<BookScreenNavigationProps>()
 
   const fetchChapters = useCallback(() => {
     const grouped = verses.reduce((acc, verse) => {
@@ -48,7 +53,7 @@ export function ItemBook({ data }: Props) {
   const progress = (count / 50) * 100
 
   function handleSelected() {
-    console.log(Object.keys(chapters))
+    navigation.navigate('Book', { chapters })
   }
 
   useEffect(() => {

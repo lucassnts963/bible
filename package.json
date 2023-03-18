@@ -10,6 +10,7 @@
   "dependencies": {
     "@react-native-firebase/app": "^17.3.2",
     "@react-native-firebase/auth": "^17.3.2",
+    "@react-native-firebase/database": "^17.3.2",
     "@react-native-google-signin/google-signin": "^9.0.2",
     "@react-navigation/material-top-tabs": "^6.6.2",
     "@react-navigation/native": "^6.1.6",
@@ -24,6 +25,7 @@
     "expo-status-bar": "~1.4.4",
     "expo-system-ui": "~2.2.1",
     "expo-web-browser": "~12.1.1",
+    "lodash": "^4.17.21",
     "native-base": "^3.4.28",
     "react": "18.2.0",
     "react-native": "0.71.3",
@@ -38,6 +40,7 @@
   "devDependencies": {
     "@babel/core": "^7.20.0",
     "@rocketseat/eslint-config": "^1.2.0",
+    "@types/lodash": "^4.14.191",
     "babel-plugin-inline-dotenv": "^1.7.0",
     "babel-plugin-module-resolver": "^5.0.0",
     "dotenv": "^16.0.3"

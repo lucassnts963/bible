@@ -5,7 +5,7 @@ import { PrivateNavigator } from './private'
 import { PublicNavigator } from './public'
 
 import { useAuth } from '@/hooks/useAuth'
-import { AuthContextProvider } from '@/contexts/AuthContext'
+import { AuthContextProvider } from '@/contexts'
 
 export function RootNavigator() {
   const { colorMode } = useColorMode()

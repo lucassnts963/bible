@@ -7,14 +7,18 @@ interface Props {
 }
 
 export function ItemBook({ data }: Props) {
-  const { progress, title, total } = data
-
   const { colorMode } = useColorMode()
+  const { title, verses } = data
+
+  const count = verses.length
+
+  const progress = (count / 50) * 100
+
   return (
     <VStack w="full" space={2}>
       <HStack w="full" justifyContent="space-between">
         <Text>{title}</Text>
-        <Text>{total}</Text>
+        <Text>{count}</Text>
       </HStack>
       <Progress
         w="full"

@@ -1,9 +1,14 @@
-import { Background, Testament } from '@/components'
+import { Background, Testament, Loading } from '@/components'
+import { useBooks } from '@/hooks'
 
 export function NewTestament() {
+  const { booksNewTestament: books, loaded } = useBooks()
+
+  if (!loaded) return <Loading />
+
   return (
     <Background>
-      <Testament data={[]} />
+      <Testament data={books} />
     </Background>
   )
 }

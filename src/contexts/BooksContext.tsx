@@ -24,6 +24,29 @@ interface BooksState {
   loaded: boolean
 }
 
+function filter(values: Verse[], testament: 'antigo' | 'novo'): Book[] {
+  const filtered = values.filter((verse) => verse.testament === testament)
+
+  const grouped = filtered.reduce((acc, verse) => {
+    if (!acc[verse.book]) {
+      acc[verse.book] = []
+    }
+
+    acc[verse.book].push(verse)
+
+    return acc
+  }, {})
+
+  const booksTitles = Object.keys(grouped)
+
+  return booksTitles.map((title) => {
+    return {
+      title,
+      verses: grouped[title],
+    }
+  })
+}
+
 export const BooksContext = createContext<BooksState>({
   booksOldTestament: null,
   booksNewTestament: null,
@@ -39,29 +62,6 @@ export function BooksContextProvider({ children }: Props) {
   const [orderBy, setOrderBy] = useState<'timeline' | 'standard'>('standard')
   const [booksOldTestament, setBooksOldTestament] = useState<Book[]>()
   const [booksNewTestament, setBooksNewTestament] = useState<Book[]>()
-
-  function filter(values: Verse[], testament: 'antigo' | 'novo'): Book[] {
-    const filtered = values.filter((verse) => verse.testament === testament)
-
-    const grouped = filtered.reduce((acc, verse) => {
-      if (!acc[verse.book]) {
-        acc[verse.book] = []
-      }
-
-      acc[verse.book].push(verse)
-
-      return acc
-    }, {})
-
-    const booksTitles = Object.keys(grouped)
-
-    return booksTitles.map((title) => {
-      return {
-        title,
-        verses: grouped[title],
-      }
-    })
-  }
 
   useEffect(() => {
     const reference = database().ref('/bible')

@@ -1,34 +1,81 @@
-import { HStack, Progress, Text, VStack, useColorMode } from 'native-base'
+import {
+  HStack,
+  Pressable,
+  Progress,
+  Text,
+  VStack,
+  useColorMode,
+} from 'native-base'
 
-import { Book } from '@/entities'
+import { Book, Chapter } from '@/entities'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Props {
   data: Book
 }
 
 export function ItemBook({ data }: Props) {
+  const [count, setCount] = useState(0)
+  const [chapters, setChapters] = useState<Chapter[]>()
   const { colorMode } = useColorMode()
   const { title, verses } = data
 
-  const count = verses.length
+  const fetchChapters = useCallback(() => {
+    const grouped = verses.reduce((acc, verse) => {
+      if (!acc[verse.chapter]) {
+        acc[verse.chapter] = []
+      }
+
+      acc[verse.chapter].push(verse)
+
+      return acc
+    }, {})
+
+    const chaptersCodes = Object.keys(grouped)
+
+    setCount(chaptersCodes.length)
+
+    setChapters(
+      chaptersCodes.map((key) => {
+        return {
+          code: Number(key),
+          verses: grouped[key],
+        }
+      }),
+    )
+  }, [verses])
 
   const progress = (count / 50) * 100
 
+  function handleSelected() {
+    console.log(Object.keys(chapters))
+  }
+
+  useEffect(() => {
+    fetchChapters()
+  }, [fetchChapters])
+
   return (
-    <VStack w="full" space={2}>
-      <HStack w="full" justifyContent="space-between">
-        <Text>{title}</Text>
-        <Text>{count}</Text>
-      </HStack>
-      <Progress
-        w="full"
-        value={progress * 100}
-        bgColor={colorMode === 'dark' ? 'gray.700' : 'gray.500'}
-        mb={2}
-        _filledTrack={{
-          bg: colorMode === 'dark' ? 'amber.700' : 'amber.500',
-        }}
-      />
-    </VStack>
+    <Pressable onPress={handleSelected}>
+      <VStack w="full" space={2}>
+        <HStack w="100%" justifyContent="space-between">
+          <Text>{title}</Text>
+          <Text>{count}</Text>
+        </HStack>
+        <Progress
+          w="100%"
+          size="lg"
+          value={progress}
+          bgColor={colorMode === 'dark' ? 'gray.700' : 'gray.500'}
+          mb={2}
+          _filledTrack={{
+            bg: colorMode === 'dark' ? 'amber.700' : 'amber.500',
+          }}
+        />
+        <Text position="absolute" left="50%" top="45%">
+          {progress.toFixed(0)}%
+        </Text>
+      </VStack>
+    </Pressable>
   )
 }

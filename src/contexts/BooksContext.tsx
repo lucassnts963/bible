@@ -7,9 +7,8 @@ import {
   useState,
 } from 'react'
 
-import database from '@react-native-firebase/database'
-
-import { Book, Verse } from '@/entities'
+import { Book, Chapter, Verse } from '@/entities'
+import { useVerses } from '@/hooks/useVerses'
 
 interface Props {
   children: ReactNode
@@ -21,28 +20,53 @@ interface BooksState {
   verses: Verse[]
   orderBy: 'timeline' | 'standard'
   setOrderBy: Dispatch<SetStateAction<'standard' | 'timeline'>>
-  loaded: boolean
+  error?: string
+  markAsReadByChapter: (code: number) => void
+}
+
+function groupBy<T>(values: T[], key: string) {
+  const grouped = values.reduce((acc, verse) => {
+    if (!acc[verse[key]]) {
+      acc[verse[key]] = []
+    }
+
+    acc[verse[key]].push(verse)
+
+    return acc
+  }, {})
+
+  return grouped
+}
+
+function getKeys(groupedObject: Object) {
+  return Object.keys(groupedObject)
 }
 
 function filter(values: Verse[], testament: 'antigo' | 'novo'): Book[] {
   const filtered = values.filter((verse) => verse.testament === testament)
 
-  const grouped = filtered.reduce((acc, verse) => {
-    if (!acc[verse.book]) {
-      acc[verse.book] = []
-    }
+  const grouped = groupBy(filtered, 'book')
 
-    acc[verse.book].push(verse)
-
-    return acc
-  }, {})
-
-  const booksTitles = Object.keys(grouped)
+  const booksTitles = getKeys(grouped)
 
   return booksTitles.map((title) => {
+    const groupedByChapter = groupBy(grouped[title], 'chapter')
+
+    const chaptersNumbers = getKeys(groupedByChapter)
+
+    const chapters = chaptersNumbers.map((chapter) => {
+      const verses = groupedByChapter[chapter]
+      const read = verses.every((verse) => verse.read)
+      return {
+        code: Number(chapter),
+        verses,
+        read,
+      } as Chapter
+    })
+
     return {
       title,
-      verses: grouped[title],
+      chapters,
     }
   })
 }
@@ -53,42 +77,41 @@ export const BooksContext = createContext<BooksState>({
   verses: null,
   orderBy: 'standard',
   setOrderBy: () => {},
-  loaded: false,
+  error: '',
+  markAsReadByChapter: () => {},
 })
 
 export function BooksContextProvider({ children }: Props) {
-  const [loaded, setLoaded] = useState(false)
-  const [verses, setVerses] = useState<Verse[]>()
   const [orderBy, setOrderBy] = useState<'timeline' | 'standard'>('standard')
   const [booksOldTestament, setBooksOldTestament] = useState<Book[]>()
   const [booksNewTestament, setBooksNewTestament] = useState<Book[]>()
 
+  const { verses, markVersesAsRead } = useVerses()
+
+  function markAsReadByChapter(chapterCode: number) {
+    const verseToMark = verses.filter((verse) => verse.chapter === chapterCode)
+
+    markVersesAsRead(verseToMark)
+  }
+
   useEffect(() => {
-    const reference = database().ref('/bible')
+    const oldTestament = filter(verses, 'antigo')
+    const newTestament = filter(verses, 'novo')
 
-    reference.once('value').then((snapshot) => {
-      const values = snapshot.val() as Verse[]
-      setVerses(values)
-      setLoaded(true)
+    setBooksOldTestament(oldTestament)
 
-      const oldTestament = filter(values, 'antigo')
-      const newTestament = filter(values, 'novo')
-
-      setBooksOldTestament(oldTestament)
-
-      setBooksNewTestament(newTestament)
-    })
-  }, [])
+    setBooksNewTestament(newTestament)
+  }, [verses])
 
   return (
     <BooksContext.Provider
       value={{
         booksOldTestament,
         booksNewTestament,
-        verses,
         orderBy,
         setOrderBy,
-        loaded,
+        verses,
+        markAsReadByChapter,
       }}
     >
       {children}

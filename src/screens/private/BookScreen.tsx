@@ -1,37 +1,49 @@
-import { Center, FlatList } from 'native-base'
+import { Dimensions, StatusBar } from 'react-native'
+import { Center, HStack, Pressable, ScrollView } from 'native-base'
 import { useRoute } from '@react-navigation/native'
 
 import { BookScreenRouteProps } from '@/routes'
 import { Background } from '@/components'
-import { StatusBar } from 'react-native'
+import { useBooks } from '@/hooks'
 
 export function BookScreen() {
   const { params } = useRoute<BookScreenRouteProps>()
-
   const { chapters } = params
 
-  const itemSize = 20
+  const { markAsReadByChapter } = useBooks()
+
+  const itemSize = 50
+
+  const screenWidth = Dimensions.get('window').width
+  const itemsPerRow = Math.floor(screenWidth / itemSize)
+  const itemSpacing = (screenWidth - itemSize * itemsPerRow) / (itemsPerRow + 1)
 
   return (
     <Background pt={StatusBar.currentHeight}>
-      <FlatList
-        flex={1}
-        numColumns={4}
-        data={chapters}
-        keyExtractor={(item) => String(item.code)}
-        renderItem={({ item }) => (
-          <Center
-            w={itemSize}
-            h={itemSize}
-            m={2}
-            bgColor="amber.500"
-            _dark={{ bgColor: 'amber.700' }}
-            rounded="lg"
-          >
-            {item.code}
-          </Center>
-        )}
-      />
+      <ScrollView>
+        <HStack flexWrap="wrap" justifyContent="center">
+          {chapters.map((chapter) => {
+            return (
+              <Pressable
+                key={chapter.code}
+                onPress={() => markAsReadByChapter(chapter.code)}
+              >
+                <Center
+                  w={itemSize}
+                  h={itemSize}
+                  m={itemSpacing + 2}
+                  mb={itemSpacing + 2}
+                  bgColor={chapter.read ? 'amber.500' : 'gray.200'}
+                  _dark={{ bgColor: chapter.read ? 'amber.700' : 'gray.600' }}
+                  rounded="lg"
+                >
+                  {chapter.code}
+                </Center>
+              </Pressable>
+            )
+          })}
+        </HStack>
+      </ScrollView>
     </Background>
   )
 }

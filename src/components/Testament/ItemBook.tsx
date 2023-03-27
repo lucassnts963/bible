@@ -7,8 +7,7 @@ import {
   useColorMode,
 } from 'native-base'
 
-import { Book, Chapter } from '@/entities'
-import { useCallback, useEffect, useState } from 'react'
+import { Book } from '@/entities'
 import { useNavigation } from '@react-navigation/native'
 
 import { BookScreenNavigationProps } from '@/routes'
@@ -18,47 +17,18 @@ interface Props {
 }
 
 export function ItemBook({ data }: Props) {
-  const [count, setCount] = useState(0)
-  const [chapters, setChapters] = useState<Chapter[]>()
   const { colorMode } = useColorMode()
-  const { title, verses } = data
+  const { title, chapters } = data
 
   const navigation = useNavigation<BookScreenNavigationProps>()
 
-  const fetchChapters = useCallback(() => {
-    const grouped = verses.reduce((acc, verse) => {
-      if (!acc[verse.chapter]) {
-        acc[verse.chapter] = []
-      }
-
-      acc[verse.chapter].push(verse)
-
-      return acc
-    }, {})
-
-    const chaptersCodes = Object.keys(grouped)
-
-    setCount(chaptersCodes.length)
-
-    setChapters(
-      chaptersCodes.map((key) => {
-        return {
-          code: Number(key),
-          verses: grouped[key],
-        }
-      }),
-    )
-  }, [verses])
+  const count = chapters.length
 
   const progress = (count / 50) * 100
 
   function handleSelected() {
     navigation.navigate('Book', { chapters })
   }
-
-  useEffect(() => {
-    fetchChapters()
-  }, [fetchChapters])
 
   return (
     <Pressable onPress={handleSelected}>

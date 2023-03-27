@@ -1,10 +1,10 @@
-import { Background, Testament, Loading } from '@/components'
+import { Background, Loading, Testament } from '@/components'
 import { useBooks } from '@/hooks'
 
 export function NewTestament() {
-  const { booksNewTestament: books, loaded } = useBooks()
+  const { booksNewTestament: books } = useBooks()
 
-  if (!loaded) return <Loading />
+  if (!books) return <Loading />
 
   return (
     <Background>

@@ -10,4 +10,5 @@ export interface Verse {
   text: string
   time: number
   verse: number
+  read?: boolean
 }
